@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 0.1.1
+GOLANG_MK_VERSION := 0.1.2
 
 GO ?= go
 
@@ -25,6 +25,13 @@ golang-dep: ## Run dep ensure
 		$(GO) get -u github.com/golang/dep/cmd/dep; \
 	fi
 	dep ensure
+
+.PHONY: golang-dep-update
+golang-dep-update: ## Update dependencies using dep
+	@hash dep > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		$(GO) get -u github.com/golang/dep/cmd/dep; \
+	fi
+	dep ensure --update
 
 .PHONY: golang-fmt
 golang-fmt: ## Format go code
