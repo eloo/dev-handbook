@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 0.1.6
+GOLANG_MK_VERSION := 0.1.7
 
 GO ?= go
 
@@ -108,7 +108,7 @@ golang-install: $(wildcard *.go) ## Run go install
 
 .PHONY: golang-build
 golang-build: ## Build the binary
-	$(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS) -X main.SemVer=dev' -o "$(BUILD_DIR)/$(EXECUTABLE)"
+	$(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS) -X main.SemVer=${VERSION}-snapshot' -o "$(BUILD_DIR)/$(EXECUTABLE)"
 
 .PHONY: golang-name
 golang-release-name: ## Print predicated binary release name
