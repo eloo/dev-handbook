@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 0.1.3
+GOLANG_MK_VERSION := 0.1.4
 
 GO ?= go
 
@@ -9,6 +9,18 @@ GOFMT ?= gofmt -s
 
 GOFLAGS := -i -v
 EXTRA_GOFLAGS ?=
+
+# Defaults for build release artifacts
+# Can be modified by setting it before loading this file
+ifndef GOLANG_RELEASE_OS
+  GOLANG_RELEASE_OS=linux windows darwin
+endif
+ifndef GOLANG_RELEASE_ARCH
+  GOLANG_RELEASE_ARCH=386 amd64 arm arm64
+endif
+ifndef GOLANG_RELEASE_OSARCH
+  GOLANG_RELEASE_OSARCH=!darwin/arm !darwin/arm64
+endif
 
 LDFLAGS := -X "main.Version=$(shell git describe --tags --always | sed 's/-/+/' | sed 's/^v//')" -X "main.Tags=$(TAGS)"
 
@@ -110,7 +122,7 @@ golang-release-build: ## Build release binaries
 	@hash gox > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/mitchellh/gox; \
 	fi
-	gox -os "linux windows darwin" -arch="386 amd64 arm arm64" -osarch="!darwin/arm !darwin/arm64" -ldflags '$(LDFLAGS)' -output "$(DIST)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}" 
+	gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}" -ldflags '$(LDFLAGS)' -output "$(DIST)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
 
 .PHONY: golang-release-check
 golang-release-check: ## Create sha256 sums
