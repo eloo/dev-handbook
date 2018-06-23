@@ -145,10 +145,10 @@ golang-release-build: ## Build release binaries
 
 .PHONY: golang-release-check
 golang-release-check: ## Create sha256 sums
-	@hash sha256 > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		echo "Warning: sha256 not found"; \
+	@hash sha256sum > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		echo "Warning: sha256sum not found"; \
 	else \
-		@cd $(DIST_DIR); $(foreach file,$(filter-out $(wildcard $(DIST_DIR)/*.sha256), $(wildcard $(DIST_DIR)/*)),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;) \
+		cd $(DIST_DIR); $(foreach file,$(filter-out $(wildcard $(DIST_DIR)/*.sha256), $(wildcard $(DIST_DIR)/*)),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;) \
 	fi
 
 golang-update-makefile: ## Update the golang.mk
