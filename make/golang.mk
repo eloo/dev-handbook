@@ -1,5 +1,5 @@
 # Golang Makefile
-# Please do not alter this file directly
+# Please do not alter this alter this directly
 GOLANG_MK_VERSION := 0.1.8-snapshot
 
 GO ?= go
@@ -12,6 +12,14 @@ EXTRA_GOFLAGS ?=
 
 MKDIR_P = mkdir -p
 
+# Defaults for directory
+# Can be modified by setting it before loading this file
+ifndef DIST_DIR
+	DIST_DIR := bin
+endif
+ifndef BUILD_DIR
+	BUILD_DIR := build
+endif
 # Defaults for build release artifacts
 # Can be modified by setting it before loading this file
 ifndef GOLANG_RELEASE_OS
