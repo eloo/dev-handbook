@@ -1,5 +1,5 @@
 # Golang Makefile
-# Please do not alter this alter this directly
+# Please do not alter this file directly
 GOLANG_MK_VERSION := 0.1.8-snapshot
 
 GO ?= go
