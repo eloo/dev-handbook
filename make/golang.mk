@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 0.1.8-snapshot
+GOLANG_MK_VERSION := 10
 
 GO ?= go
 
@@ -153,4 +153,9 @@ golang-release-check: ## Create sha256 sums
 
 golang-update-makefile: ## Update the golang.mk
 	@wget https://raw.githubusercontent.com/eloo/dev-handbook/master/make/golang.mk -O /tmp/golang.mk 2>/dev/null
-	@if ! grep -q $(GOLANG_MK_VERSION) /tmp/golang.mk; then cp /tmp/golang.mk golang.mk && echo "golang.mk updated"; else echo "golang.mk is up-to-date"; fi
+	@if [ $(shell cat /tmp/golang.mk | grep GOLANG_MK_VERSION -m1 | cut -d" " -f3) -gt $(GOLANG_MK_VERSION) ] ; then \
+         cp /tmp/golang.mk golang.mk;\
+		 echo "golang.mk updated";\
+	else \
+		echo "golang.mk is up-to-date"; \
+    fi
