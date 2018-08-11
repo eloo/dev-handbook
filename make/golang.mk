@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 11
+GOLANG_MK_VERSION := 12
 
 GO ?= go
 
@@ -166,3 +166,4 @@ golang-update-makefile: ## Update the golang.mk
 	else \
 		echo "golang.mk is up-to-date"; \
     fi
+	@rm /tmp/golang.mk || true
