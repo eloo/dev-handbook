@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 10
+GOLANG_MK_VERSION := 11
 
 GO ?= go
 
@@ -58,6 +58,13 @@ golang-dep-update: ## Update dependencies using dep
 		$(GO) get -u github.com/golang/dep/cmd/dep; \
 	fi
 	@dep ensure --update
+
+.PHONY: ensure-deps
+ensure-deps: ## Check if all imports are referenced in Gopkg.toml
+	@hash ensure-deps > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		$(GO) get -u github.com/glerchundi/ensure-deps; \
+	fi
+	@ensure-deps -exclude vendor -exclude-import ${IMPORT_NAME}
 
 .PHONY: golang-fmt
 golang-fmt: ## Format go code
