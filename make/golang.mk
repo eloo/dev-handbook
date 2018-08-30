@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 13
+GOLANG_MK_VERSION := 14
 
 GO ?= go
 
@@ -157,9 +157,13 @@ golang-release-check: ## Create sha256 sums
 	else \
 		cd $(DIST_DIR); $(foreach file,$(filter-out $(wildcard $(DIST_DIR)/*.sha256), $(wildcard $(DIST_DIR)/*)),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;) \
 	fi
+	
+.PHONY: golang-download-makefile
+golang-download-makefile:
+	wget https://raw.githubusercontent.com/eloo/dev-handbook/master/make/golang.mk -O /tmp/golang.mk 2>/dev/null
 
-golang-update-makefile: ## Update the golang.mk
-	@wget https://raw.githubusercontent.com/eloo/dev-handbook/master/make/golang.mk -O /tmp/golang.mk 2>/dev/null
+.PHONY: golang-update-makefile
+golang-update-makefile: golang-download-makefile ## Update the golang.mk
 	@if [ $(shell cat /tmp/golang.mk | grep GOLANG_MK_VERSION -m1 | cut -d" " -f3) -gt $(GOLANG_MK_VERSION) ] ; then \
          cp /tmp/golang.mk golang.mk;\
 		 echo "golang.mk updated";\
