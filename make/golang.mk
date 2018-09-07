@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 14
+GOLANG_MK_VERSION := 15
 
 GO ?= go
 
@@ -133,7 +133,7 @@ golang-install: $(wildcard *.go) ## Run go install
 	$(GO) install -v -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS)'
 
 .PHONY: golang-build
-golang-build: ## Build the binary
+golang-build: golang-dep golang-test ## Build the binary
 	$(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS) -X main.SemVer=${VERSION}-snapshot' -o "$(BUILD_DIR)/$(EXECUTABLE)"
 
 .PHONY: golang-name
@@ -144,14 +144,14 @@ golang-release-name: ## Print predicated binary release name
 golang-release: golang-release-build golang-release-check ## Trigger release-build and release-check
 
 .PHONY: golang-release-build
-golang-release-build: ## Build release binaries
+golang-release-build: golang-dep golang-test ## Build release binaries
 	@hash gox > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/mitchellh/gox; \
 	fi
 	gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}" -ldflags '$(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
 
 .PHONY: golang-release-check
-golang-release-check: ## Create sha256 sums
+golang-release-checksums: ## Create sha256 sums
 	@hash sha256sum > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		echo "Warning: sha256sum not found"; \
 	else \
