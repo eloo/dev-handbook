@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 15
+GOLANG_MK_VERSION := 16
 
 GO ?= go
 
@@ -33,6 +33,8 @@ ifndef GOLANG_RELEASE_OSARCH
 endif
 
 LDFLAGS := -X "main.SemVer=${VERSION}" -X "main.GitCommit=$(shell git describe --tags --always | sed 's/-/+/' | sed 's/^v//')" -X "main.Tags=$(TAGS)"
+
+RELEASE_LD_FLAGS := -s -w
 
 PACKAGES ?= $(shell $(GO) list ./... | grep -v /vendor/)
 
@@ -148,7 +150,7 @@ golang-release-build: golang-dep golang-test ## Build release binaries
 	@hash gox > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/mitchellh/gox; \
 	fi
-	gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}" -ldflags '$(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
+	gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}"  -ldflags '$(RELEASE_LD_FLAGS) $(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
 
 .PHONY: golang-release-check
 golang-release-checksums: ## Create sha256 sums
