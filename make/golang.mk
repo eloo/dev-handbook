@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 16
+GOLANG_MK_VERSION := 17
 
 GO ?= go
 
@@ -173,3 +173,9 @@ golang-update-makefile: golang-download-makefile ## Update the golang.mk
 		echo "golang.mk is up-to-date"; \
     fi
 	@rm /tmp/golang.mk || true
+
+golang-todo: ## Display TODO and FIXME items in the source code.
+	@! ag --ignore golang.mk --ignore-dir vendor --ignore-dir runtime TODO
+	@! ag --ignore golang.mk --ignore-dir vendor --ignore-dir runtime XXX
+	@! ag --ignore golang.mk --ignore-dir vendor --ignore-dir runtime FIXME
+	@! ag --ignore golang.mk --ignore-dir vendor --ignore-dir runtime "FIX ME"
