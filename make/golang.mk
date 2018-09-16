@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 17
+GOLANG_MK_VERSION := 18
 
 GO ?= go
 
@@ -41,6 +41,16 @@ PACKAGES ?= $(shell $(GO) list ./... | grep -v /vendor/)
 .PHONY: golang-directories
 golang-directories: ## Creates necessary directories for golang.mk
 	$(MKDIR_P) $(BUILD_DIR)
+	
+.PHONY: golang-tools
+golang-tools: ## Install/Update used golang tools
+	$(GO) get -u github.com/golang/dep/cmd/dep
+	$(GO) get -u github.com/glerchundi/ensure-deps
+	$(GO) get -u github.com/kisielk/errcheck
+	$(GO) get -u github.com/golang/lint/golint
+	$(GO) get -u github.com/client9/misspell/cmd/misspell
+	$(GO) get -u github.com/wadey/gocovmerge
+	$(GO) get -u github.com/mitchellh/gox
 
 .PHONY: golang-clean
 golang-clean: ## Cleanup go files
