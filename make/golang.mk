@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 18
+GOLANG_MK_VERSION := 19
 
 GO ?= go
 
@@ -8,7 +8,7 @@ GOFILES := $(shell find . -name "*.go" -type f ! -path "./vendor/*")
 GOFMT ?= gofmt -s
 
 GOFLAGS := -i -v
-EXTRA_GOFLAGS ?=
+EXTRA_GOFLAGS ?= -gcflags "all=-trimpath=$(GOPATH)"
 
 MKDIR_P = mkdir -p
 
@@ -160,7 +160,7 @@ golang-release-build: golang-dep golang-test ## Build release binaries
 	@hash gox > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/mitchellh/gox; \
 	fi
-	gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}"  -ldflags '$(RELEASE_LD_FLAGS) $(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
+	gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}" $(EXTRA_GOFLAGS) -ldflags '$(RELEASE_LD_FLAGS) $(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
 
 .PHONY: golang-release-check
 golang-release-checksums: ## Create sha256 sums
