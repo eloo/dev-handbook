@@ -1,8 +1,10 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 19
+GOLANG_MK_VERSION := 20
 
-GO ?= go
+GO_ENVS := GO111MODULE=on
+
+GO ?= $(GO_ENVS) go
 
 GOFILES := $(shell find . -name "*.go" -type f ! -path "./vendor/*")
 GOFMT ?= gofmt -s
@@ -41,7 +43,7 @@ PACKAGES ?= $(shell $(GO) list ./... | grep -v /vendor/)
 .PHONY: golang-directories
 golang-directories: ## Creates necessary directories for golang.mk
 	$(MKDIR_P) $(BUILD_DIR)
-	
+
 .PHONY: golang-tools
 golang-tools: ## Install/Update used golang tools
 	$(GO) get -u github.com/golang/dep/cmd/dep
@@ -57,26 +59,13 @@ golang-clean: ## Cleanup go files
 	$(GO) clean -i ./...
 	rm -rf $(EXECUTABLE) $(DIST_DIR) $(BUILD_DIR)
 
-.PHONY: golang-dep
-golang-dep: ## Run dep ensure
-	@hash dep > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/golang/dep/cmd/dep; \
-	fi
-	@dep ensure
+.PHONY: golang-tidy
+golang-tidy: ## Run go mod tidy
+	$(GO) mod tidy
 
-.PHONY: golang-dep-update
-golang-dep-update: ## Update dependencies using dep
-	@hash dep > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/golang/dep/cmd/dep; \
-	fi
-	@dep ensure --update
-
-.PHONY: golang-ensure-deps
-golang-ensure-deps: ## Check if all imports are referenced in Gopkg.toml
-	@hash ensure-deps > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/glerchundi/ensure-deps; \
-	fi
-	@ensure-deps -exclude vendor -exclude-import ${IMPORT_NAME}
+.PHONY: golang-update-deps
+golang-update-deps: ## Update dependencies using go mod
+	$(GO) get -u
 
 .PHONY: golang-fmt
 golang-fmt: ## Format go code
@@ -130,7 +119,7 @@ golang-test: ## Test go files
 
 .PHONY: golang-coverage
 golang-coverage: golang-directories ## Runs tests with coverage
-	go test -covermode=count -coverprofile $(BUILD_DIR)/coverage.out $(PACKAGES)
+	$(GO) test -covermode=count -coverprofile $(BUILD_DIR)/coverage.out $(PACKAGES)
 
 .PHONY: golang-coverage-report
 golang-coverage-report: golang-coverage ## Creates an html report for the code coverage
@@ -138,14 +127,14 @@ golang-coverage-report: golang-coverage ## Creates an html report for the code c
 		$(GO) get -u github.com/wadey/gocovmerge; \
 	fi
 	gocovmerge $(shell find . -type f -name "coverage.out") > $(BUILD_DIR)/coverage.all
-	go tool cover -html=$(BUILD_DIR)/coverage.all -o $(BUILD_DIR)/coverage.html
+	$(GO) tool cover -html=$(BUILD_DIR)/coverage.all -o $(BUILD_DIR)/coverage.html
 
 .PHONY: golang-install
 golang-install: $(wildcard *.go) ## Run go install
 	$(GO) install -v -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS)'
 
 .PHONY: golang-build
-golang-build: golang-dep golang-test ## Build the binary
+golang-build: golang-test ## Build the binary
 	$(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS) -X main.SemVer=${VERSION}-snapshot' -o "$(BUILD_DIR)/$(EXECUTABLE)"
 
 .PHONY: golang-name
@@ -156,11 +145,11 @@ golang-release-name: ## Print predicated binary release name
 golang-release: golang-release-build golang-release-check ## Trigger release-build and release-check
 
 .PHONY: golang-release-build
-golang-release-build: golang-dep golang-test ## Build release binaries
+golang-release-build: golang-test ## Build release binaries
 	@hash gox > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/mitchellh/gox; \
 	fi
-	gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}" $(EXTRA_GOFLAGS) -ldflags '$(RELEASE_LD_FLAGS) $(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
+	$(GO_ENVS) gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}" $(EXTRA_GOFLAGS) -ldflags '$(RELEASE_LD_FLAGS) $(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
 
 .PHONY: golang-release-check
 golang-release-checksums: ## Create sha256 sums
@@ -169,7 +158,7 @@ golang-release-checksums: ## Create sha256 sums
 	else \
 		cd $(DIST_DIR); $(foreach file,$(filter-out $(wildcard $(DIST_DIR)/*.sha256), $(wildcard $(DIST_DIR)/*)),sha256sum $(notdir $(file)) > $(notdir $(file)).sha256;) \
 	fi
-	
+
 .PHONY: golang-download-makefile
 golang-download-makefile:
 	wget https://raw.githubusercontent.com/eloo/dev-handbook/master/make/golang.mk -O /tmp/golang.mk 2>/dev/null
