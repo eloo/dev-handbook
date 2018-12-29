@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 21
+GOLANG_MK_VERSION := 22
 
 GO_ENVS := GO111MODULE=on
 
@@ -143,7 +143,7 @@ golang-release-name: ## Print predicated binary release name
 	@echo "$(EXECUTABLE)-$(VERSION)"
 
 .PHONY: golang-release
-golang-release: golang-release-build golang-release-check ## Trigger release-build and release-check
+golang-release: golang-release-build golang-release-checksums ## Trigger release-build and release-check
 
 .PHONY: golang-release-build
 golang-release-build: golang-test ## Build release binaries
@@ -152,7 +152,7 @@ golang-release-build: golang-test ## Build release binaries
 	fi
 	$(GO_ENVS) gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}" $(EXTRA_GOFLAGS) $(EXTRA_RELEASE_GOFLAGS) -ldflags '$(RELEASE_LD_FLAGS) $(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
 
-.PHONY: golang-release-check
+.PHONY: golang-release-checksums
 golang-release-checksums: ## Create sha256 sums
 	@hash sha256sum > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		echo "Warning: sha256sum not found"; \
