@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 20
+GOLANG_MK_VERSION := 21
 
 GO_ENVS := GO111MODULE=on
 
@@ -10,7 +10,8 @@ GOFILES := $(shell find . -name "*.go" -type f ! -path "./vendor/*")
 GOFMT ?= gofmt -s
 
 GOFLAGS := -i -v
-EXTRA_GOFLAGS ?= -gcflags "all=-trimpath=$(GOPATH)"
+EXTRA_GOFLAGS ?=
+EXTRA_RELEASE_GOFLAGS ?= -gcflags "all=-trimpath=$(GOPATH)"
 
 MKDIR_P = mkdir -p
 
@@ -149,7 +150,7 @@ golang-release-build: golang-test ## Build release binaries
 	@hash gox > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/mitchellh/gox; \
 	fi
-	$(GO_ENVS) gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}" $(EXTRA_GOFLAGS) -ldflags '$(RELEASE_LD_FLAGS) $(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
+	$(GO_ENVS) gox -os "${GOLANG_RELEASE_OS}" -arch="${GOLANG_RELEASE_ARCH}" -osarch="${GOLANG_RELEASE_OSARCH}" $(EXTRA_GOFLAGS) $(EXTRA_RELEASE_GOFLAGS) -ldflags '$(RELEASE_LD_FLAGS) $(LDFLAGS)' -output "$(DIST_DIR)/$(EXECUTABLE)-$(VERSION)_{{.OS}}_{{.Arch}}"
 
 .PHONY: golang-release-check
 golang-release-checksums: ## Create sha256 sums
