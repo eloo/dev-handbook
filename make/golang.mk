@@ -18,10 +18,10 @@ MKDIR_P = mkdir -p
 # Defaults for directory
 # Can be modified by setting it before loading this file
 ifndef DIST_DIR
-	DIST_DIR := bin
+	DIST_DIR := dist
 endif
 ifndef BUILD_DIR
-	BUILD_DIR := build
+	BUILD_DIR := bin
 endif
 # Defaults for build release artifacts
 # Can be modified by setting it before loading this file
