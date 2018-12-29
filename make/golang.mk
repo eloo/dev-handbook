@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 22
+GOLANG_MK_VERSION := 23
 
 GO_ENVS := GO111MODULE=on
 
