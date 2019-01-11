@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 26
+GOLANG_MK_VERSION := 27
 
 GO_ENVS := GO111MODULE=on
 
@@ -87,7 +87,7 @@ golang-lint: ## Lint go files using gometalinter
 	@hash gometalinter > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		echo "You maybe should run 'make golang-tools'"; \
 	fi
-	$(GO_ENVS) gometalinter .
+	$(GO_ENVS) gometalinter ./...
 
 .PHONY: golang-misspell-check
 golang-misspell-check: ## Run misspell
