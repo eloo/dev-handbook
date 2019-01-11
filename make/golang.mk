@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 23
+GOLANG_MK_VERSION := 24
 
 GO_ENVS := GO111MODULE=on
 
@@ -109,13 +109,13 @@ golang-fmt-check: ## Format go and fail if not formatted
 	# get all go files and run go fmt on them
 	@diff=$$($(GOFMT) -d $(GOFILES)); \
 	if [ -n "$$diff" ]; then \
-		echo "Please run 'make fmt' and commit the result:"; \
+		echo "Please run 'make golang-fmt' and commit the result:"; \
 		echo "$${diff}"; \
 		exit 1; \
 	fi;
 
 .PHONY: golang-test
-golang-test: ## Test go files
+golang-test: golang-fmt ## Test go files
 	$(GO) test $(PACKAGES)
 
 .PHONY: golang-coverage
