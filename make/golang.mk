@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 24
+GOLANG_MK_VERSION := 25
 
 GO_ENVS := GO111MODULE=on
 
@@ -47,8 +47,6 @@ golang-directories: ## Creates necessary directories for golang.mk
 
 .PHONY: golang-tools
 golang-tools: ## Install/Update used golang tools
-	$(GO) get -u github.com/golang/dep/cmd/dep
-	$(GO) get -u github.com/glerchundi/ensure-deps
 	$(GO) get -u github.com/kisielk/errcheck
 	$(GO) get -u github.com/golang/lint/golint
 	$(GO) get -u github.com/client9/misspell/cmd/misspell
