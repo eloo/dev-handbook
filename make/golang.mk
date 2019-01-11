@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 25
+GOLANG_MK_VERSION := 26
 
 GO_ENVS := GO111MODULE=on
 
@@ -52,6 +52,7 @@ golang-tools: ## Install/Update used golang tools
 	$(GO) get -u github.com/client9/misspell/cmd/misspell
 	$(GO) get -u github.com/wadey/gocovmerge
 	$(GO) get -u github.com/mitchellh/gox
+	$(GO) get -u github.com/alecthomas/gometalinter
 
 .PHONY: golang-clean
 golang-clean: ## Cleanup go files
@@ -79,14 +80,14 @@ golang-errcheck: ## Run errcheck
 	@hash errcheck > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/kisielk/errcheck; \
 	fi
-	errcheck $(PACKAGES)
+	$(GO_ENVS) errcheck $(PACKAGES)
 
 .PHONY: golang-lint
-golang-lint: ## Lint go files
-	@hash golint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/golang/lint/golint; \
+golang-lint: ## Lint go files using gometalinter
+	@hash gometalinter > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		echo "You maybe should run 'make golang-tools'"; \
 	fi
-	for PKG in $(PACKAGES); do golint -set_exit_status $$PKG || exit 1; done;
+	$(GO_ENVS) gometalinter .
 
 .PHONY: golang-misspell-check
 golang-misspell-check: ## Run misspell
