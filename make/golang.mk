@@ -52,7 +52,7 @@ golang-tools: ## Install/Update used golang tools
 	$(GO) get -u github.com/client9/misspell/cmd/misspell
 	$(GO) get -u github.com/wadey/gocovmerge
 	$(GO) get -u github.com/mitchellh/gox
-	curl -L https://git.io/vp6lP | sh
+	cd $GOPATH && curl -L https://git.io/vp6lP | sh
 
 .PHONY: golang-clean
 golang-clean: ## Cleanup go files
