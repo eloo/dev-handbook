@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 29
+GOLANG_MK_VERSION := 30
 
 GO_ENVS := GO111MODULE=on
 
@@ -39,7 +39,8 @@ LDFLAGS := -X "main.SemVer=${VERSION}" -X "main.GitCommit=$(shell git describe -
 
 RELEASE_LD_FLAGS := -s -w
 
-PACKAGES ?= $(shell $(GO) list ./... | grep -ve ".*/internal/testutils")
+PACKAGES ?= $(shell $(GO) list ./...)
+PACKAGES_COVERAGE ?= $(shell $(GO) list ./... | grep -ve ".*/internal/testutils")
 
 .PHONY: golang-directories
 golang-directories: ## Creates necessary directories for golang.mk
@@ -119,7 +120,7 @@ golang-test: golang-fmt ## Test go files
 
 .PHONY: golang-coverage
 golang-coverage: golang-directories ## Runs tests with coverage
-	$(GO) test -covermode=count -coverprofile $(BUILD_DIR)/coverage.out $(PACKAGES)
+	$(GO) test -covermode=count -coverprofile $(BUILD_DIR)/coverage.out $(PACKAGES_COVERAGE)
 
 .PHONY: golang-coverage-report
 golang-coverage-report: golang-coverage ## Creates an html report for the code coverage
