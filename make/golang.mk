@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 28
+GOLANG_MK_VERSION := 29
 
 GO_ENVS := GO111MODULE=on
 
@@ -39,7 +39,7 @@ LDFLAGS := -X "main.SemVer=${VERSION}" -X "main.GitCommit=$(shell git describe -
 
 RELEASE_LD_FLAGS := -s -w
 
-PACKAGES ?= $(shell $(GO) list ./... | grep -v /vendor/)
+PACKAGES ?= $(shell $(GO) list ./... | grep -ve ".*/internal/testutils")
 
 .PHONY: golang-directories
 golang-directories: ## Creates necessary directories for golang.mk
