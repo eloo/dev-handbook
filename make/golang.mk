@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 30
+GOLANG_MK_VERSION := 31
 
 GO_ENVS := GO111MODULE=on
 
@@ -53,7 +53,7 @@ golang-tools: ## Install/Update used golang tools
 	$(GO) get -u github.com/client9/misspell/cmd/misspell
 	$(GO) get -u github.com/wadey/gocovmerge
 	$(GO) get -u github.com/mitchellh/gox
-	cd $GOPATH && curl -L https://git.io/vp6lP | sh && cd -
+	cd ${GOPATH} && curl -L https://git.io/vp6lP | sh && cd -
 
 .PHONY: golang-clean
 golang-clean: ## Cleanup go files
