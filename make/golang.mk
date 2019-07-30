@@ -1,8 +1,8 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 31
+GOLANG_MK_VERSION := 32
 
-GO_ENVS := GO111MODULE=on
+GO_ENVS ?= 
 
 GO ?= $(GO_ENVS) go
 
@@ -11,7 +11,7 @@ GOFMT ?= gofmt -s
 
 GOFLAGS := -i -v
 EXTRA_GOFLAGS ?=
-EXTRA_RELEASE_GOFLAGS ?= -gcflags "all=-trimpath=$(GOPATH)"
+EXTRA_RELEASE_GOFLAGS ?= -gcflags "all=-trimpath=$(PWD)"
 
 MKDIR_P = mkdir -p
 
