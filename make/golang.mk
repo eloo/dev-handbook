@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 32
+GOLANG_MK_VERSION := 33
 
 GO_ENVS :=
 
