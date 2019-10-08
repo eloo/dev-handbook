@@ -2,7 +2,7 @@
 # Please do not alter this alter this directly
 GOLANG_MK_VERSION := 32
 
-GO_ENVS ?= 
+GO_ENVS :=
 
 GO ?= $(GO_ENVS) go
 
@@ -11,7 +11,7 @@ GOFMT ?= gofmt -s
 
 GOFLAGS := -i -v
 EXTRA_GOFLAGS ?=
-EXTRA_RELEASE_GOFLAGS ?= -gcflags "all=-trimpath=$(PWD)"
+EXTRA_RELEASE_GOFLAGS ?= -gcflags "all=-trimpath=$(GOPATH)"
 
 MKDIR_P = mkdir -p
 
@@ -40,7 +40,8 @@ LDFLAGS := -X "main.SemVer=${VERSION}" -X "main.GitCommit=$(shell git describe -
 RELEASE_LD_FLAGS := -s -w
 
 PACKAGES ?= $(shell $(GO) list ./...)
-PACKAGES_COVERAGE ?= $(shell $(GO) list ./... | grep -ve ".*/internal/testutils")
+PACKAGES_COVERAGE ?= $(shell $(GO) list ./... | grep -v -e ".*/internal/testutils" -e "./integration_test")
+PACKAGES_COVERAGE_2 ?= $(shell $(GO) list ./... | grep -v -e ".*/internal/testutils" -e "./integration_test" | xargs | sed -e 's/ /,/g')
 
 .PHONY: golang-directories
 golang-directories: ## Creates necessary directories for golang.mk
@@ -49,11 +50,13 @@ golang-directories: ## Creates necessary directories for golang.mk
 .PHONY: golang-tools
 golang-tools: ## Install/Update used golang tools
 	$(GO) get -u github.com/kisielk/errcheck
-	$(GO) get -u github.com/golang/lint/golint
+	$(GO) get -u golang.org/x/lint
 	$(GO) get -u github.com/client9/misspell/cmd/misspell
 	$(GO) get -u github.com/wadey/gocovmerge
 	$(GO) get -u github.com/mitchellh/gox
-	cd ${GOPATH} && curl -L https://git.io/vp6lP | sh && cd -
+	$(GO) get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	$(GO) get -u github.com/tebeka/go2xunit
+	$(GO) get -u github.com/jstemmer/go-junit-report
 
 .PHONY: golang-clean
 golang-clean: ## Cleanup go files
@@ -84,11 +87,11 @@ golang-errcheck: ## Run errcheck
 	$(GO_ENVS) errcheck $(PACKAGES)
 
 .PHONY: golang-lint
-golang-lint: ## Lint go files using gometalinter
-	@hash gometalinter > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		echo "You maybe should run 'make golang-tools'"; \
+golang-lint: golang-directories ## Lint go files using golangci-lint
+	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		$(GO) get -u github.com/golangci/golangci-lint/cmd/golangci-lint; \
 	fi
-	$(GO_ENVS) gometalinter ./...
+	$(GO_ENVS) golangci-lint run  ./... --out-format checkstyle | tee $(BUILD_DIR)/lint.xml
 
 .PHONY: golang-misspell-check
 golang-misspell-check: ## Run misspell
@@ -115,19 +118,34 @@ golang-fmt-check: ## Format go and fail if not formatted
 	fi;
 
 .PHONY: golang-test
-golang-test: golang-fmt ## Test go files
-	$(GO) test $(PACKAGES)
+golang-test: golang-fmt golang-directories ## Test go files
+	@hash go-junit-report > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		$(GO) get -u github.com/jstemmer/go-junit-report; \
+	fi
+	2>&1 $(GO) test -v -short $(PACKAGES) | tee $(BUILD_DIR)/tests.out
+#	go2xunit -input $(BUILD_DIR)/tests.out -output $(BUILD_DIR)/tests.xml
+	go-junit-report < $(BUILD_DIR)/tests.out > $(BUILD_DIR)/tests.xml
+
+.PHONY: golang-integration-test
+golang-integration-test: golang-fmt golang-directories ## Test go files
+	@hash go-junit-report > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		$(GO) get -u github.com/jstemmer/go-junit-report; \
+	fi
+	2>&1 $(GO) test -v ./integration_test | tee $(BUILD_DIR)/integration-tests.out
+#	go2xunit -input $(BUILD_DIR)/integration-tests.out -output $(BUILD_DIR)/integration-tests.xml
+	go-junit-report < $(BUILD_DIR)/integration-tests.out > $(BUILD_DIR)/integration-tests.xml
 
 .PHONY: golang-coverage
 golang-coverage: golang-directories ## Runs tests with coverage
 	$(GO) test -covermode=count -coverprofile $(BUILD_DIR)/coverage.out $(PACKAGES_COVERAGE)
+	$(GO) test ./integration_test  -coverpkg=$(PACKAGES_COVERAGE_2) -covermode=count -coverprofile $(BUILD_DIR)/int-coverage.out
 
 .PHONY: golang-coverage-report
 golang-coverage-report: golang-coverage ## Creates an html report for the code coverage
 	@hash gocovmerge > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/wadey/gocovmerge; \
 	fi
-	gocovmerge $(shell find . -type f -name "coverage.out") > $(BUILD_DIR)/coverage.all
+	gocovmerge $(shell find . -type f -name "coverage.out") $(BUILD_DIR)/int-coverage.out > $(BUILD_DIR)/coverage.all
 	$(GO) tool cover -html=$(BUILD_DIR)/coverage.all -o $(BUILD_DIR)/coverage.html
 
 .PHONY: golang-install
