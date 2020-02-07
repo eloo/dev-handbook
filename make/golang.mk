@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 34
+GOLANG_MK_VERSION := 35
 
 SHELL=/bin/bash -o pipefail
 
@@ -76,47 +76,12 @@ golang-update-deps: ## Update dependencies using go mod
 golang-fmt: ## Format go code
 	$(GOFMT) -w $(GOFILES)
 
-.PHONY: golang-vet
-golang-vet: ## Vet the go files
-	$(GO) vet $(PACKAGES)
-
-.PHONY: golang-errcheck
-golang-errcheck: ## Run errcheck
-	@hash errcheck > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/kisielk/errcheck; \
-	fi
-	$(GO_ENVS) errcheck $(PACKAGES)
-
 .PHONY: golang-lint
 golang-lint: golang-directories ## Lint go files using golangci-lint
 	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/golangci/golangci-lint/cmd/golangci-lint; \
 	fi
 	$(GO_ENVS) golangci-lint run  ./... --out-format checkstyle | tee $(BUILD_DIR)/lint.xml
-
-.PHONY: golang-misspell-check
-golang-misspell-check: ## Run misspell
-	@hash misspell > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/client9/misspell/cmd/misspell; \
-	fi
-	misspell -error -i unknwon $(GOFILES)
-
-.PHONY: golang-misspell
-golang-misspell: ## Run misspell without breaking the build
-	@hash misspell > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		$(GO) get -u github.com/client9/misspell/cmd/misspell; \
-	fi
-	misspell -w -i unknwon $(GOFILES)
-
-.PHONY: golang-fmt-check
-golang-fmt-check: ## Format go and fail if not formatted
-	# get all go files and run go fmt on them
-	@diff=$$($(GOFMT) -d $(GOFILES)); \
-	if [ -n "$$diff" ]; then \
-		echo "Please run 'make golang-fmt' and commit the result:"; \
-		echo "$${diff}"; \
-		exit 1; \
-	fi;
 
 .PHONY: golang-test
 golang-test: golang-fmt golang-directories ## Test go files
@@ -153,7 +118,7 @@ golang-install: $(wildcard *.go) ## Run go install
 golang-build: golang-test ## Build the binary
 	$(GO) build $(GOFLAGS) $(EXTRA_GOFLAGS) -tags '$(TAGS)' -ldflags '-s -w $(LDFLAGS) -X main.SemVer=${VERSION}-snapshot' -o "$(BUILD_DIR)/$(EXECUTABLE)"
 
-.PHONY: golang-name
+.PHONY: golang-release-name
 golang-release-name: ## Print predicated binary release name
 	@echo "$(EXECUTABLE)-$(VERSION)"
 
