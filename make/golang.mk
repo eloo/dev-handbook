@@ -1,6 +1,6 @@
 # Golang Makefile
 # Please do not alter this alter this directly
-GOLANG_MK_VERSION := 35
+GOLANG_MK_VERSION := 36
 
 SHELL=/bin/bash -o pipefail
 
@@ -88,14 +88,14 @@ golang-test: golang-fmt golang-directories ## Test go files
 	@hash go-junit-report > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/jstemmer/go-junit-report; \
 	fi
-	2>&1 $(GO) test -v -short $(PACKAGES) | tee /dev/tty | go-junit-report > $(BUILD_DIR)/tests.xml
+	2>&1 $(GO) test -v -short $(PACKAGES) | tee /dev/stderr | go-junit-report > $(BUILD_DIR)/tests.xml
 
 .PHONY: golang-integration-test
 golang-integration-test: golang-fmt golang-directories ## Test go files
 	@hash go-junit-report > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) get -u github.com/jstemmer/go-junit-report; \
 	fi
-	2>&1 $(GO) test -v ./integration_test | tee /dev/tty | go-junit-report > $(BUILD_DIR)/integration-tests.xml
+	2>&1 $(GO) test -v ./integration_test | tee /dev/stderr | go-junit-report > $(BUILD_DIR)/integration-tests.xml
 
 .PHONY: golang-coverage
 golang-coverage: golang-directories ## Runs tests with coverage
